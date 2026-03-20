@@ -8,7 +8,17 @@ app.use(express.json());
 const UI_USER = process.env.UI_USER || 'admin';
 const UI_PASS = process.env.UI_PASS || 'admin';
 
-// Auth middleware
+// Serve static files WITHOUT auth
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Auth endpoint
+app.post('/api/auth', (req, res) => {
+  const { user, pass } = req.body;
+  if (user === UI_USER && pass === UI_PASS) res.json({ ok: true });
+  else res.json({ ok: false });
+});
+
+// Auth middleware for all /api/ except /api/auth and /api/health
 function requireAuth(req, res, next) {
   if (req.path === '/api/auth' || req.path === '/api/health') return next();
   const auth = req.headers['authorization'];
@@ -18,14 +28,7 @@ function requireAuth(req, res, next) {
   next();
 }
 
-app.post('/api/auth', (req, res) => {
-  const { user, pass } = req.body;
-  if (user === UI_USER && pass === UI_PASS) res.json({ ok: true });
-  else res.json({ ok: false });
-});
-
-app.use(requireAuth);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api', requireAuth);
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
