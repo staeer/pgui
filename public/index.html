@@ -225,7 +225,13 @@
     <div class="auto-refresh">
       <span>Auto-refresh</span>
       <div class="toggle on" id="refreshToggle" onclick="toggleRefresh()"></div>
-      <span class="refresh-indicator" id="refreshIndicator">2s</span>
+      <select id="refreshIntervalSelect" onchange="changeRefreshInterval()" style="background:var(--bg3);border:1px solid var(--border2);color:var(--accent);font-family:var(--mono);font-size:10px;padding:2px 4px;border-radius:4px;cursor:pointer;outline:none;">
+        <option value="2000">2s</option>
+        <option value="5000">5s</option>
+        <option value="10000">10s</option>
+        <option value="30000">30s</option>
+        <option value="60000">1m</option>
+      </select>
     </div>
     <button class="btn-logout" onclick="doLogout()">Logout</button>
   </div>
@@ -763,19 +769,25 @@ function switchView(view) {
   if (view==='schema') loadSchema();
 }
 
+let refreshMs = 2000;
+
 function startRefresh() {
   if (refreshInterval) clearInterval(refreshInterval);
   refreshInterval = setInterval(() => {
     if (!refreshEnabled) return;
     if (currentTable && document.getElementById('viewTable').style.display!=='none' && !editingCell) loadTableData();
     loadTables();
-  }, 2000);
+  }, refreshMs);
 }
 
 function toggleRefresh() {
   refreshEnabled = !refreshEnabled;
   document.getElementById('refreshToggle').className = 'toggle ' + (refreshEnabled?'on':'');
-  document.getElementById('refreshIndicator').textContent = refreshEnabled ? '2s' : 'off';
+}
+
+function changeRefreshInterval() {
+  refreshMs = parseInt(document.getElementById('refreshIntervalSelect').value);
+  startRefresh();
 }
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
