@@ -512,7 +512,31 @@ function startCellEdit(e) {
   if (editingCell && editingCell !== td) cancelCellEdit();
   editingCell = td;
   td.classList.add('editing');
-  const input = td.querySelector('.cell-edit');
+
+  const isBool = td.classList.contains('bool-val') || td.dataset.raw === 'true' || td.dataset.raw === 'false';
+  if (isBool) {
+    // Hide input, show/create select
+    const input = td.querySelector('input.cell-edit');
+    if (input) input.style.display = 'none';
+    let sel = td.querySelector('select.cell-edit-bool');
+    if (!sel) {
+      sel = document.createElement('select');
+      sel.className = 'cell-edit cell-edit-bool';
+      sel.dataset.col = td.dataset.col;
+      sel.innerHTML = '<option value="true">true</option><option value="false">false</option>';
+      sel.addEventListener('change', () => saveCellEdit(sel));
+      sel.addEventListener('keydown', e2 => { if (e2.key==='Escape') cancelCellEdit(); });
+      sel.addEventListener('blur', () => setTimeout(cancelCellEdit, 100));
+      td.appendChild(sel);
+    }
+    sel.style.display = 'block';
+    sel.value = td.dataset.raw;
+    sel.focus();
+    return;
+  }
+
+  const input = td.querySelector('input.cell-edit');
+  input.style.display = '';
   input.focus();
   input.select();
 }
@@ -569,6 +593,10 @@ async function saveCellEdit(input, moveNext = false) {
 function cancelCellEdit() {
   if (!editingCell) return;
   editingCell.classList.remove('editing');
+  const sel = editingCell.querySelector('select.cell-edit-bool');
+  if (sel) sel.style.display = 'none';
+  const inp = editingCell.querySelector('input.cell-edit');
+  if (inp) inp.style.display = '';
   editingCell = null;
 }
 
