@@ -762,10 +762,10 @@ async function createTable() {
 }
 
 function switchView(view) {
-  const displays = { table: 'flex', sql: 'flex', schema: 'flex' };
+  const idMap = { table: 'viewTable', sql: 'viewSQL', schema: 'viewSchema' };
   ['table','sql','schema'].forEach(v => {
-    const el = document.getElementById('view' + v.charAt(0).toUpperCase() + v.slice(1));
-    el.style.display = v === view ? displays[v] : 'none';
+    const el = document.getElementById(idMap[v]);
+    el.style.display = v === view ? 'flex' : 'none';
     document.getElementById('tab-' + v).classList.toggle('active', v === view);
   });
   if (view === 'schema') loadSchema();
